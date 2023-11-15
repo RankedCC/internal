@@ -1,0 +1,6 @@
+rootProject.name = 'internal'
+include 'protocol'
+include 'controller'
+include 'bukkit-connector'
+include 'bungee-connector'
+

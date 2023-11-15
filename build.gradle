@@ -1,0 +1,110 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.0.0" apply false
+}
+
+def user = findProperty("repo.mexish.user")
+def pass = findProperty("repo.mexish.pass")
+
+allprojects {
+    group = 'cc.ranked'
+    version = '1.0-SNAPSHOT'
+}
+
+ext.set('output', findProperty("gradle.output") ?: "./output/")
+
+configure(subprojects) {
+    apply plugin: "java"
+    apply plugin: "maven-publish"
+    apply plugin: "com.github.johnrengelman.shadow"
+
+    repositories {
+        mavenCentral()
+
+        maven {
+            url = "https://repo.mexish.net/repository/maven-releases/"
+
+            credentials {
+                username = user
+                password = pass
+            }
+
+            mavenContent {
+                releasesOnly()
+            }
+        }
+
+        maven {
+            url = "https://repo.mexish.net/repository/maven-snapshots/"
+
+            credentials {
+                username = user
+                password = pass
+            }
+
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
+    }
+
+    tasks {
+        shadowJar {
+            exclude 'META-INF/DEPENDENCIES'
+            exclude 'META-INF/LICENSE'
+            exclude 'META-INF/LICENSE.txt'
+            exclude 'META-INF/NOTICE'
+            exclude 'META-INF/NOTICE.txt'
+            exclude 'META-INF/maven/**'
+
+            mergeServiceFiles {
+                include 'META-INF/impl/**'
+            }
+        }
+
+        // !!! Minimal runtime version required is 11 !!!
+        compileJava {
+            targetCompatibility = JavaVersion.VERSION_11
+            sourceCompatibility = JavaVersion.VERSION_11
+            options.encoding = "UTF-8"
+        }
+
+        build {
+            dependsOn(shadowJar)
+        }
+
+//        jar {
+//            finalizedBy(publish)
+//        }
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+
+        repositories {
+            maven {
+                credentials {
+                    username = user
+                    password = pass
+                }
+
+                if (project.version.endsWith("-SNAPSHOT")) {
+                    url = "https://repo.mexish.net/repository/maven-snapshots/"
+                } else {
+                    url = "https://repo.mexish.net/repository/maven-releases/"
+                }
+            }
+        }
+    }
+
+    dependencies {
+        implementation "net.mexish:lombok:1.0"
+        annotationProcessor "net.mexish:lombok:1.0"
+        implementation "net.mexish.commons:mcommons-core:1.0.2"
+
+        implementation 'org.jetbrains:annotations:24.0.0'
+    }
+}

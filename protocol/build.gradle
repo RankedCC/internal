@@ -1,0 +1,6 @@
+dependencies {
+    implementation 'io.netty:netty-transport-native-epoll:4.1.90.Final:linux-x86_64'
+    implementation 'io.netty:netty-handler:4.1.90.Final'
+    implementation 'io.netty:netty-codec:4.1.90.Final'
+    implementation 'it.unimi.dsi:fastutil:8.1.0'
+}
